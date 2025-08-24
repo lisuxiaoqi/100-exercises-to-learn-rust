@@ -25,4 +25,12 @@ mod tests {
     fn ticket_ref_size() {
         assert_eq!(size_of::<&Ticket>(), 8);
     }
+
+    //fat pointer，胖指针和普通指针不一样，即存储位置，还存储长度
+    //因为编译期无法得知具体的长度，，胖指针比如&str, 切片等
+    #[test]
+    fn str_size() {
+        assert_eq!(size_of::<&String>(), 8);        //普通指针
+        assert_eq!(size_of::<&str>(), 16);          //胖指针
+    }
 }
