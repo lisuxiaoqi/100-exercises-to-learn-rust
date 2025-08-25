@@ -33,4 +33,14 @@ mod tests {
         assert_eq!(size_of::<&String>(), 8);        //普通指针
         assert_eq!(size_of::<&str>(), 16);          //胖指针
     }
+
+    #[test]
+    fn slice_size() {
+        //数组u32 = 4, 3*4=12
+        assert_eq!(size_of::<[u32; 3]>(), 12);
+        //数组的指针是普通指针。&[u32; 3]代表数组指针
+        assert_eq!(size_of::<&[u32; 3]>(), 8);
+        //Slice是胖指针：&[u32]代表slice，没有明确长度，长度信息藏在胖指针里
+        assert_eq!(size_of::<&[u32]>(), 16);
+    }
 }
