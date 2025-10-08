@@ -6,10 +6,24 @@
 // collections (e.g. BTreeMap).
 
 /// Return the minimum of two values.
-pub fn min<T>(left: T, right: T) -> T {
+//这里同时定义了inline方式和where方式，只是为了联系
+// 其实只要一种即可
+pub fn min<T: PartialOrd>(left: T, right: T) -> T
+where
+    T: PartialOrd,
+{
     if left <= right {
         left
     } else {
         right
+    }
+}
+
+mod tests {
+    use super::*;
+    #[test]
+    fn test_min() {
+        let ret = min::<i32>(18, 29);
+        println!("The minimum is {}", ret);
     }
 }
