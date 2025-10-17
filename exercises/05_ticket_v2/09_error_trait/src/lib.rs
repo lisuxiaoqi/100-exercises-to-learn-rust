@@ -3,17 +3,47 @@
 //  The docs for the `std::fmt` module are a good place to start and look for examples:
 //  https://doc.rust-lang.org/std/fmt/index.html#write
 
+use std::error::Error;
+use std::fmt::{Debug, Display, Formatter};
+
 enum TicketNewError {
     TitleError(String),
     DescriptionError(String),
 }
+
+impl Debug for TicketNewError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TicketNewError::TitleError(title) => write!(f, "{}", title),
+            TicketNewError::DescriptionError(desc) => write!(f, "{}", desc),
+        }
+    }
+}
+
+
+impl Display for TicketNewError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TicketNewError::TitleError(title) => write!(f, "{}", title),
+            TicketNewError::DescriptionError(desc) => write!(f, "{}", desc),
+        }
+    }
+}
+
+impl Error for TicketNewError {}
 
 // TODO: `easy_ticket` should panic when the title is invalid, using the error message
 //   stored inside the relevant variant of the `TicketNewError` enum.
 //   When the description is invalid, instead, it should use a default description:
 //   "Description not provided".
 fn easy_ticket(title: String, description: String, status: Status) -> Ticket {
-    todo!()
+    Ticket::new(title.clone(), description.clone(), status.clone()).unwrap_or_else(
+        |err| match err {
+            TicketNewError::DescriptionError(_) => {
+                Ticket::new(title, "Description not provided".to_string(), status).unwrap()
+            }
+            TicketNewError::TitleError(e) => panic!("{}", e.as_str()),
+        })
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -68,7 +98,7 @@ impl Ticket {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use common::{overly_long_description, overly_long_title, valid_description, valid_title};
+    use common::*;
     use static_assertions::assert_impl_one;
 
     #[test]

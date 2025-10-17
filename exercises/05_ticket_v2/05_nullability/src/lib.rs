@@ -36,7 +36,15 @@ impl Ticket {
         }
     }
     pub fn assigned_to(&self) -> Option<&String> {
-        todo!()
+        //这里编译器会自动解应用
+        //等同于if let Status::InProgress { assigned_to } = *(&self.status)
+        //并且，如果匹配的是一个引用（&T），Rust 会把模式里的绑定默认按引用绑定（by reference）；
+        //assigned_to: &String  // 因为我们匹配的是 &Status，不拥有所有权
+        if let Status::InProgress { assigned_to } = &self.status {
+            Some(assigned_to)
+        } else {
+            None
+        }
     }
 }
 

@@ -1,10 +1,43 @@
+use crate::TicketTitle;
+use thiserror::Error;
+
 // TODO: Implement `TryFrom<String>` and `TryFrom<&str>` for the `Status` enum.
 //  The parsing should be case-insensitive.
-
+#[derive(Debug, PartialEq, Clone)]
 pub enum Status {
     ToDo,
     InProgress,
     Done,
+}
+
+#[derive(Error, Debug)]
+#[error("oh no")]
+pub struct StatusErr;
+
+impl TryFrom<String> for Status {
+    type Error = StatusErr;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.to_uppercase().as_str() {
+            "ToDO" => Ok(Status::ToDo),
+            "InProgress" => Ok(Status::InProgress),
+            "Done" => Ok(Status::Done),
+            _ => Err(StatusErr)
+        }
+    }
+}
+
+impl TryFrom<&str> for Status {
+    type Error = StatusErr;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value.to_uppercase().as_str() {
+            "ToDO" => Ok(Status::ToDo),
+            "InProgress" => Ok(Status::InProgress),
+            "Done" => Ok(Status::Done),
+            _ => Err(StatusErr)
+        }
+    }
 }
 
 #[cfg(test)]

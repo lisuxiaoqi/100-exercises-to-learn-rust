@@ -2,7 +2,12 @@
 //   When the description is invalid, instead, it should use a default description:
 //   "Description not provided".
 fn easy_ticket(title: String, description: String, status: Status) -> Ticket {
-    todo!()
+    Ticket::new(title.clone(), description.clone(), status.clone())
+        .unwrap_or_else(|err| match err.as_str() {
+            "Description cannot be empty" | "Description cannot be longer than 500 bytes"
+            => Ticket::new(title, String::from("Description not provided"), status).unwrap(),
+            _ => panic!("{}", err.as_str()),
+        })
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -69,5 +74,22 @@ mod tests {
     fn template_description_is_used_if_too_long() {
         let ticket = easy_ticket(valid_title(), overly_long_description(), Status::ToDo);
         assert_eq!(ticket.description, "Description not provided");
+    }
+}
+#[cfg(test)]
+mod tests_add {
+    fn foo() -> Result<i32, String> {
+        Ok(0)
+    }
+
+    fn costy() -> i32 {
+        println!("costy run");
+        0
+    }
+
+    #[test]
+    fn test_unwrap() {
+        //无论foo返回什么，costy都会执行，和unwrap_or_else不一样
+        _ = foo().unwrap_or(costy())
     }
 }

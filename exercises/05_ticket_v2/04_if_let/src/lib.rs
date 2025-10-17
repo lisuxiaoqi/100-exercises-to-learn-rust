@@ -8,7 +8,17 @@ impl Shape {
     // TODO: Implement the `radius` method using
     //  either an `if let` or a `let/else`.
     pub fn radius(&self) -> f64 {
-        todo!()
+        // if let Shape::Circle { radius: r1 } = self {
+        //     return *r1;
+        // } else {
+        //     panic!("This should not happen")
+        // }
+
+        let Shape::Circle { radius: r } = self else {
+            panic!("This should not happen!");
+        };
+        let _ = r + 1_f64;
+        *r
     }
 }
 
@@ -34,6 +44,6 @@ mod tests {
             width: 1.0,
             height: 2.0,
         }
-        .radius();
+            .radius();
     }
 }
