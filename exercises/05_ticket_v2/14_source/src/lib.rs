@@ -63,9 +63,9 @@ impl Ticket {
 
 #[cfg(test)]
 mod tests {
-    use common::{valid_description, valid_title};
-
     use super::*;
+    use common::{valid_description, valid_title};
+    use thiserror::Error;
 
     #[test]
     fn invalid_status() {
@@ -76,4 +76,45 @@ mod tests {
         );
         assert!(err.source().is_some());
     }
+
+    //实现error嵌套，多个子error, 返回到一个父error中
+    #[derive(Debug, Error)]
+    enum CommonError {
+        #[error("{0}")]
+        #[from]
+        InvalidInfo(SubError)
+    }
+
+    #[derive(Debug, Error)]
+    enum SubError {
+        #[error("sub error 1")]
+        SubError1,
+        #[error("sub error 2")]
+        SubError2,
+    }
+
+    fn f_err1() -> Result<(), SubError> {
+        Err(SubError::SubError1)
+    }
+
+    fn f_err2() -> Result<(), SubError> {
+        Err(SubError::SubError2)
+    }
+
+    //?操作符做了很多事：
+    //  *解包，判断是否有错误。没有则继续执行
+    //  *有错误：
+    //      * 会调用From Trait,把子错误转化为父错误
+    //      * 会用Err把返回值封装为Result类型
+    fn f_cmm(i: u8) -> Result<(), CommonError> {
+        match i {
+            1 => {
+                f_err1()?;
+                //必须加这个，因为？操作符只管理错误路径，正确路径需要返回值
+                Ok(())
+            }
+            _ => Ok(()),
+        }
+    }
 }
+
