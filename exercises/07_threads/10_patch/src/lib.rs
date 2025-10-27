@@ -35,7 +35,14 @@ impl TicketStoreClient {
         Ok(response_receiver.recv().unwrap())
     }
 
-    pub fn update(&self, ticket_patch: TicketPatch) -> Result<(), OverloadedError> {}
+    pub fn update(&self, ticket_patch: TicketPatch) -> Result<(), OverloadedError> {
+        let (response_sender, response_receiver) = sync_channel(1);
+        self.sender.try_send(Command::Update {
+            patch: ticket_patch,
+            response_channel: response_sender,
+        }).map_err(|_| OverloadedError)?;
+        Ok(response_receiver.recv().unwrap())
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -68,24 +75,37 @@ pub fn server(receiver: Receiver<Command>) {
     loop {
         match receiver.recv() {
             Ok(Command::Insert {
-                draft,
-                response_channel,
-            }) => {
+                   draft,
+                   response_channel,
+               }) => {
                 let id = store.add_ticket(draft);
                 let _ = response_channel.send(id);
             }
             Ok(Command::Get {
-                id,
-                response_channel,
-            }) => {
+                   id,
+                   response_channel,
+               }) => {
                 let ticket = store.get(id);
                 let _ = response_channel.send(ticket.cloned());
             }
             Ok(Command::Update {
-                patch,
-                response_channel,
-            }) => {
-                todo!()
+                   patch,
+                   response_channel,
+               }) => {
+                let Some(ticket) = store.get_mut(patch.id) else {
+                    response_channel.send(()).expect("failed to send ticket");
+                    return;
+                };
+                if let Some(title) = patch.title {
+                    ticket.title = title
+                };
+                if let Some(description) = patch.description {
+                    ticket.description = description
+                };
+                if let Some(status) = patch.status {
+                    ticket.status = status
+                };
+                response_channel.send(()).expect("failed to send ticket");
             }
             Err(_) => {
                 // There are no more senders, so we can safely break

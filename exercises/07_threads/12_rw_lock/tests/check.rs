@@ -27,5 +27,6 @@ fn works() {
     {
         let mut ticket = ticket.write().unwrap();
         ticket.status = Status::InProgress;
+        drop(ticket);
     }
 }

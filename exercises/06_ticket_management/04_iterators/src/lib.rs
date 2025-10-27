@@ -14,6 +14,14 @@ pub struct TicketStore {
     tickets: Vec<Ticket>,
 }
 
+impl<'a> Iterator for TicketStore {
+    type Item = &'a Ticket;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.tickets.iter().next()
+    }
+}
+
 impl IntoIterator for TicketStore {
     type Item = Ticket;
     type IntoIter = IntoIter<Ticket>;

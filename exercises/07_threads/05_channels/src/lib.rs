@@ -1,10 +1,11 @@
+use crate::data::TicketDraft;
 use std::sync::mpsc::{Receiver, Sender};
 
 pub mod data;
 pub mod store;
 
 pub enum Command {
-    Insert(todo!()),
+    Insert(TicketDraft),
 }
 
 // Start the system by spawning the server thread.
@@ -20,4 +21,11 @@ pub fn launch() -> Sender<Command> {
 //  Enter a loop: wait for a command to show up in
 //  the channel, then execute it, then start waiting
 //  for the next command.
-pub fn server(receiver: Receiver<Command>) {}
+pub fn server(receiver: Receiver<Command>) {
+    let mut store = store::TicketStore::new();
+    while let Ok(command) = receiver.recv() {
+        if let Command::Insert(draft) = command {
+            store.add_ticket(draft);
+        }
+    }
+}

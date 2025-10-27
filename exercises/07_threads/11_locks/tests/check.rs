@@ -20,6 +20,7 @@ fn works() {
         assert_eq!(ticket.description, draft.description);
 
         ticket.status = Status::InProgress;
+        drop(ticket);
     }
 
     let ticket = client.get(ticket_id).unwrap().unwrap();
